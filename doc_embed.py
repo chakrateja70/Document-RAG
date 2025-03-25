@@ -1,26 +1,27 @@
-from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, TextLoader
-from typing import List
-from langchain_core.documents import Document
 import os
+from typing import List
 
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from sentence_transformers import SentenceTransformer
-
-from langchain_community.vectorstores import Pinecone as PineconeVectorStore
-from pinecone import Pinecone
 from dotenv import load_dotenv
+from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, TextLoader
+from langchain_core.documents import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_pinecone import PineconeVectorStore
+
 load_dotenv()
 
-api_key = os.getenv('PINECONE_API_KEY')
-
-"""This function will load all documents from a folder.
-It will use the appropriate loader for each file type.
-Supported file types are .pdf, .docx, and .txt.
-The function will return a list of Document objects.
-Each Document object will contain the text of a single page.
-The function will print a warning for unsupported file types."""
-
 def load_documents(folder_path: str) -> List[Document]:
+    """
+    Load documents from a specified folder.
+    Supports PDF, DOCX, and TXT file types.
+    
+    Args:
+        folder_path (str): Path to the folder containing documents
+    
+    Returns:
+        List[Document]: List of loaded document pages
+    """
     pages = []
     for filename in os.listdir(folder_path):
         file_path = os.path.join(folder_path, filename)
@@ -36,46 +37,46 @@ def load_documents(folder_path: str) -> List[Document]:
         pages.extend(loader.load())
     return pages
 
+def main():
+    # Verify API key
+    Pinecone_api_key = os.getenv('PINECONE_API_KEY')
+    if not Pinecone_api_key:
+        raise ValueError("Pinecone API key not found in environment variables")
 
-folder_path = "files/"
-pages = load_documents(folder_path)
-# print(pages[1])
+    # Load documents
+    folder_path = "files/"
+    pages = load_documents(folder_path)
+    print(f"Loaded {len(pages)} documents from the folder.")
 
-#print(f"Loaded {len(pages)} documents from the folder.")
+    # Text splitting
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=100,
+        chunk_overlap=20,
+        length_function=len,
+        is_separator_regex=False,
+    )
+    chunks = text_splitter.split_documents(pages)
+    print(f"Split the document into {len(chunks)} chunks.")
+    
+    index_name = "doc-rag"
 
-# This text splitter will split the text into chunks 
-text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=100,
-    chunk_overlap=20,
-    length_function=len,
-    is_separator_regex=False,
-)
-chunks = text_splitter.split_documents(pages)
-#print(f"split the document into  {len(chunks)} chunks.")
-# second_doc_chunks = [chunk for chunk in splits if chunk.metadata["source"] == pages[1].metadata["source"]]
+    # Prepare embedding function
+    embedding_function = HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    )
 
-# if second_doc_chunks:
-#     print(second_doc_chunks[3000])
+    # Store documents in Pinecone using PineconeVectorStore
+    vectordb = PineconeVectorStore.from_documents(
+        documents=chunks,
+        embedding=embedding_function,
+        index_name=index_name,
+    )
 
-"""This code will embed the text chunks using the MiniLM model.
-The embeddings will be stored in a list.
-The list will contain one embedding for each chunk.
-The embeddings can be used to compare the similarity of the chunks.
-The embeddings can also be used to cluster the chunks.
-The embeddings can be used for other natural language processing tasks."""
+    print("Data successfully stored in Pinecone!", vectordb)
 
-model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-for chunk in chunks:
-    embeddings = model.encode(chunk.page_content)
-# print(embeddings)
+    print(f"Data successfully stored in Pinecone under index '{index_name}'!")
 
+    return vectordb
 
-pc = Pinecone(api_key)
-
-print("pc", pc)
-#index = pc.Index("quickstart")
-
-index_name = "document-rag"
-
-# Connect to Pinecone index and insert the chunked docs as contents
-docsearch = PineconeVectorStore.from_documents(chunks, embeddings, index_name=index_name)
+if __name__ == "__main__":
+    main()
