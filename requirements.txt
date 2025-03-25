@@ -3,5 +3,5 @@ langchain_core
 python-dotenv
 langchain_text_splitters
 sentence-transformers
-langchain-chroma
+langchain-pinecone
 pypdf

@@ -6,6 +6,12 @@ import os
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from sentence_transformers import SentenceTransformer
 
+from langchain_community.vectorstores import Pinecone as PineconeVectorStore
+from pinecone import Pinecone
+from dotenv import load_dotenv
+load_dotenv()
+
+api_key = os.getenv('PINECONE_API_KEY')
 
 """This function will load all documents from a folder.
 It will use the appropriate loader for each file type.
@@ -63,3 +69,13 @@ for chunk in chunks:
     embeddings = model.encode(chunk.page_content)
 # print(embeddings)
 
+
+pc = Pinecone(api_key)
+
+print("pc", pc)
+#index = pc.Index("quickstart")
+
+index_name = "document-rag"
+
+# Connect to Pinecone index and insert the chunked docs as contents
+docsearch = PineconeVectorStore.from_documents(chunks, embeddings, index_name=index_name)
