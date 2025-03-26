@@ -24,7 +24,7 @@ def main():
     rag_chain = setup_rag_chain(collection)
 
     # Example query
-    query = "which college did chakra teja studying"
+    query = "Provide a detailed explanation of the 'Multi-Agent System for Web Search and Finance' project by Chakra Teja Polamarasetty, including its implementation and key components."
     response = rag_chain.invoke(query)
     print(f"Query: {query}")
     print(f"Response: {response}")

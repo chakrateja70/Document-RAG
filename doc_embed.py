@@ -137,7 +137,7 @@ def setup_rag_chain(collection: chromadb.Collection):
     Returns:
         Callable: RAG chain for querying
     """
-    llm = Ollama(model="llama3:latest")
+    llm = Ollama(model="llama3:8b")
 
     # Define the RAG prompt template
     prompt_template = """Use the following context to answer the question. 
