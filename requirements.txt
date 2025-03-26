@@ -5,3 +5,4 @@ langchain_text_splitters
 sentence-transformers
 langchain-pinecone
 pypdf
+accelerate

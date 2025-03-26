@@ -5,6 +5,7 @@
         "jinaai",
         "langchain",
         "metadatas",
+        "Ollama",
         "pypdf",
         "vectordb",
         "vectorstores"
