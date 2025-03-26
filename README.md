@@ -75,10 +75,10 @@ The primary objectives of this project are:
 ### Setup Steps
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/intelligent-rag-system.git
+git clone https://github.com/chakrateja70/document-rag
 
 # Navigate to project directory
-cd intelligent-rag-system
+cd document-rag
 
 # Create virtual environment
 python -m venv venv
@@ -132,10 +132,3 @@ python rag_system.py
 - Advanced metadata extraction
 - Enhanced UI/Web interface
 - More robust error handling
-
-## 📞 Contact
-[Your Name]
-[Your Email/LinkedIn]
-```
-
-Would you like me to elaborate on any section of the README or provide additional details about the project?
