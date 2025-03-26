@@ -6,3 +6,5 @@ sentence-transformers
 langchain-pinecone
 pypdf
 accelerate
+chromadb
+einops

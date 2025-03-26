@@ -1,134 +1,117 @@
-# Intelligent Document Retrieval and Question Answering System
+# Intelligent Document Retrieval System
 
-## 🚀 Project Overview
+## Project Overview
 
-This RAG (Retrieval-Augmented Generation) project is an advanced AI-powered document analysis and question-answering system that leverages cutting-edge technologies to extract and generate insights from various document types.
+A Retrieval-Augmented Generation (RAG) system that enables semantic document analysis and intelligent question-answering across multiple document formats.
 
-## 🎯 Project Aim
+## Project Aim
 
-The primary objectives of this project are:
-- To create an intelligent system that can ingest multiple document formats
-- Perform semantic embedding of document contents
-- Enable precise, context-aware question answering
-- Provide a scalable and flexible solution for document intelligence
+- Ingest and process documents from PDF, DOCX, and TXT formats
+- Perform semantic embedding using advanced transformer models
+- Create a vector database for efficient document retrieval
+- Generate context-aware answers using local language models
 
-## 🛠️ Technologies, Frameworks & Tools
+## Technologies & Dependencies
 
-### Programming Language
-- Python 3.8+
+### Core Libraries
+- LangChain
+- ChromaDB
+- SentenceTransformers
+- Ollama
+- python-dotenv
 
-### Core Libraries & Frameworks
-- **Document Processing**
-  - LangChain
-  - PyPDF2
-  - python-docx
-  - docx2txt
+### Supported Document Types
+- PDF
+- DOCX
+- TXT
 
-- **Embedding & Retrieval**
-  - SentenceTransformers
-  - ChromaDB
-  - Jina Embeddings
+## Key Components
 
-- **Language Models**
-  - Ollama
-  - Llama 3 8B
+### Document Processing
+- Multi-format document loader
+- Recursive text chunking
+- Semantic embedding generation
 
-- **Data Handling**
-  - Pandas
-  - NumPy
+### Retrieval Mechanism
+- Vector-based document similarity search
+- Top-k chunk retrieval
+- Context-aware query processing
 
-### Development Tools
-- Git
-- Virtual Environment (venv)
-- VS Code / PyCharm
+## Prerequisites
 
-### Additional Tools
-- Ollama (Local LLM Management)
-- Hugging Face Transformers
-
-## 🔧 Key Features
-
-1. Multi-format Document Support
-   - PDF
-   - DOCX
-   - TXT
-
-2. Advanced Embedding Techniques
-   - Semantic vector representation
-   - High-dimensional document indexing
-
-3. Intelligent Retrieval
-   - Contextual chunk retrieval
-   - Similarity-based document matching
-
-4. AI-Powered Question Answering
-   - Context-aware response generation
-   - Flexible query handling
-
-## 📦 Installation
-
-### Prerequisites
 - Python 3.8+
 - Ollama
-- CUDA (Optional, for GPU acceleration)
+- Hugging Face SentenceTransformers
 
-### Setup Steps
+## Installation
+
 ```bash
 # Clone the repository
-git clone https://github.com/chakrateja70/document-rag
-
-# Navigate to project directory
-cd document-rag
+git clone https://github.com/chakrateja70/Document-RAG
 
 # Create virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
-
-# Pull Llama 3 model
-ollama pull llama3:8b
 ```
 
-## 🚀 Usage
+## Model Recommendations
 
-### Preparing Documents
-1. Place your documents in the `./documents` directory
-2. Supported formats: PDF, DOCX, TXT
+- If you want better accuracy and richer responses → Llama 3:8B
+- If you need faster responses and lower memory usage → Mistral 7B
 
-### Running the System
 ```bash
-python rag_system.py
+# Pull recommended models
+ollama pull llama3:8b
+ollama pull mistral:7b
 ```
 
-### Interaction
-- Enter queries directly in the console
-- Type 'quit' to exit the system
+## Configuration
 
-## 🔬 Customization
+### Environment Variables
+- Create a `.env` file for any sensitive configurations
+- Supports customization of embedding models and retrieval parameters
 
-### Embedding Model
-- Modify `embed_documents()` to use different embedding models
+## Usage Example
 
-### Chunk Size
-- Adjust `chunk_size` and `chunk_overlap` in `split_chunks()`
+```python
+# Load documents
+documents = load_documents('./documents')
+chunks = split_chunks(documents)
+embeddings = embed_documents(chunks)
 
-### Language Model
-- Replace Llama 3 with other Ollama or Hugging Face models
+# Create vector database
+collection = chroma_db(chunks, embeddings)
 
-## 🤝 Contributing
+# Set up RAG chain
+rag_chain = setup_rag_chain(collection)
 
+# Query the system
+response = rag_chain.invoke("Your query here")
+print(response)
+```
+
+## Customization Points
+
+- Embedding Model: Currently using `jinaai/jina-embeddings-v3`
+- Language Model: Configurable (Llama 3:8B or Mistral 7B recommended)
+- Chunk Size: Configurable in `split_chunks()` method
+- Retrieval Strategy: Adjustable top-k results
+
+## Potential Improvements
+- Support for more document formats
+- Enhanced error handling
+- Performance optimization
+- Additional embedding models
+- Web/CLI interface
+
+## License
+MIT License
+
+## Contributing
 1. Fork the repository
-2. Create a new branch
-3. Make your changes
-4. Submit a pull request
-
-## 📜 License
-[Specify your license, e.g., MIT License]
-
-## 🏆 Future Roadmap
-- Multi-language support
-- Advanced metadata extraction
-- Enhanced UI/Web interface
-- More robust error handling
+2. Create feature branch
+3. Commit changes
+4. Push and submit pull request
