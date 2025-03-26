@@ -1,27 +1,20 @@
-from doc_embed import main
-from transformers import pipeline
-from langchain.chains import RetrievalQA
-from langchain.llms import HuggingFacePipeline
+from doc_embed import load_documents, split_chunks, embed_documents, chroma_db
 
-# Load the vectordb object from doc_embed.py
-vectordb = main()
 def main():
+    folder_path = "files/"
+    pages = load_documents(folder_path)
+    print(f"Loaded {len(pages)} documents")
+    
+    chunks = split_chunks(pages)
+    print(f"Split the document into {len(chunks)} chunks.")
 
-    model_name = "google/flan-t5-large"
-    llm_pipeline = pipeline("text2text-generation", model=model_name, tokenizer=model_name)
-
-    llm = HuggingFacePipeline(pipeline=llm_pipeline)
-
-    retriever = vectordb.as_retriever()
-
-    rag_chain = RetrievalQA.from_chain_type(
-        llm=llm,
-        retriever=retriever,
-        return_source_documents=True
-    )
-    print("RAG pipeline successfully set up with Hugging Face model!")
-
-    return rag_chain
+    embeddings = embed_documents(chunks)
+    
+    # print("Finished embedding the chunks.",embeddings)
+    
+    chroma_db(chunks, embeddings)
+    print("Finished creating the ChromaDB.")
+    
 
 if __name__ == "__main__":
     main()

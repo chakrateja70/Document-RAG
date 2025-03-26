@@ -1,4 +1,5 @@
 import os
+import chromadb
 from typing import List
 
 from dotenv import load_dotenv
@@ -6,19 +7,22 @@ from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, Te
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_pinecone import PineconeVectorStore
+# from langchain_community.embeddings.sentence_transformer import (
+#     SentenceTransformerEmbeddings,
+# )
+from sentence_transformers import SentenceTransformer
 
 load_dotenv()
+
 
 def load_documents(folder_path: str) -> List[Document]:
     """
     Load documents from a specified folder.
     Supports PDF, DOCX, and TXT file types.
-    
+
     Args:
         folder_path (str): Path to the folder containing documents
-    
+
     Returns:
         List[Document]: List of loaded document pages
     """
@@ -37,18 +41,17 @@ def load_documents(folder_path: str) -> List[Document]:
         pages.extend(loader.load())
     return pages
 
-def main():
-    # Verify API key
-    Pinecone_api_key = os.getenv('PINECONE_API_KEY')
-    if not Pinecone_api_key:
-        raise ValueError("Pinecone API key not found in environment variables")
 
-    # Load documents
-    folder_path = "files/"
-    pages = load_documents(folder_path)
-    print(f"Loaded {len(pages)} documents from the folder.")
+def split_chunks(pages: List[Document]) -> List[Document]:
+    """
+    Split documents into chunks of text.
 
-    # Text splitting
+    Args:
+        pages (List[Document]): List of loaded document pages
+
+    Returns:
+        List[Document]: List of text chunks
+    """
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=100,
         chunk_overlap=20,
@@ -56,27 +59,51 @@ def main():
         is_separator_regex=False,
     )
     chunks = text_splitter.split_documents(pages)
-    print(f"Split the document into {len(chunks)} chunks.")
+    return chunks
+
+
+def embed_documents(chunks: List[Document]) -> None:
+    # embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+    # document_embeddings = embedding_function.embed_documents(
+    #     [split.page_content for split in chunks]
+    # )
+    model = SentenceTransformer("jinaai/jina-embeddings-v3", trust_remote_code=True)
+    chunk_texts = [chunk.page_content for chunk in chunks]
+    document_embeddings = model.encode(chunk_texts)
     
-    index_name = "doc-rag"
+    return document_embeddings
 
-    # Prepare embedding function
-    embedding_function = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
+
+def chroma_db(chunks: List[Document], embeddings: List[List[float]]) -> None:
+    if len(chunks) != len(embeddings):
+        raise ValueError(f"Number of chunks ({len(chunks)}) does not match number of embeddings ({len(embeddings)})")
+    
+    # Initialize ChromaDB client
+    client = chromadb.PersistentClient(path="./chroma_db")
+    
+    # Delete existing collection if it exists
+    try:
+        client.delete_collection(name="rag_chunks")
+    except Exception:
+        pass
+    
+    # Create new collection with 1024 dimensionality
+    collection = client.create_collection(
+        name="rag_chunks", 
+        metadata={"dimensionality": 1024}
     )
 
-    # Store documents in Pinecone using PineconeVectorStore
-    vectordb = PineconeVectorStore.from_documents(
-        documents=chunks,
-        embedding=embedding_function,
-        index_name=index_name,
+    # Add chunks to the collection
+    for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
+        # Generate a more unique chunk ID
+        chunk_id = f"chunk_{i}_{hash(chunk.page_content)}"
+        
+        collection.add(
+        ids=[chunk_id],
+        embeddings=[embedding],  
+        documents=[chunk.page_content],
+        metadatas=[{"text": chunk.page_content}]  # Ensure metadata is stored
     )
 
-    print("Data successfully stored in Pinecone!", vectordb)
-
-    print(f"Data successfully stored in Pinecone under index '{index_name}'!")
-
-    return vectordb
-
-if __name__ == "__main__":
-    main()
+        
+    print(f"Stored {len(chunks)} embeddings in ChromaDB with dimension 1024.")

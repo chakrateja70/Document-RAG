@@ -1,6 +1,12 @@
 {
     "cSpell.words": [
         "dotenv",
+        "jina",
+        "jinaai",
+        "langchain",
+        "metadatas",
+        "pypdf",
+        "vectordb",
         "vectorstores"
     ]
 }

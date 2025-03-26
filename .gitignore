@@ -1,12 +1,33 @@
-venv1/
-venv/
-
+# Virtual environments
 venv/
 env/
+venv1/
+
+# Environment variables
 .env
 
+# Python cache files
 __pycache__/
+*.py[cod]
+*.pyo
 
-.vscode
-
+# VSCode settings
 .vscode/
+
+# ChromaDB database
+.chroma_db/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Compiled C extensions
+*.so
+
+# macOS system files
+.DS_Store
+
+# Windows system files
+Thumbs.db
