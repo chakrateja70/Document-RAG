@@ -54,8 +54,8 @@ def split_chunks(pages: List[Document]) -> List[Document]:
         List[Document]: List of text chunks
     """
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=100,
-        chunk_overlap=20,
+        chunk_size=500,
+        chunk_overlap=100,
         length_function=len,
         is_separator_regex=False,
     )
