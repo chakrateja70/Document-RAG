@@ -1,0 +1,2 @@
+full stack developer
+projects done: rag application

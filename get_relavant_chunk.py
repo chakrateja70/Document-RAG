@@ -18,6 +18,15 @@ results = collection.query(
         n_results=10
     )
 
-# Print the relevant chunks
-for i, doc in enumerate(results["documents"][0]):
-    print(f"Relevant Chunk {i+1}: {doc}")
+# # Print the relevant chunks
+# for i, doc in enumerate(results["documents"][0]):
+#     print(f"Relevant Chunk {i+1}: {doc}")
+
+# Print relevant chunks with cosine similarity > 0.8
+for i, (doc, score) in enumerate(zip(results["documents"][0], results["distances"][0])):
+    similarity = 1 - score  # Since ChromaDB returns distances, convert to similarity
+    if similarity:
+        print(f"🔹 Relevant Chunk {i+1}: {doc}")
+        print(f"🔸 Cosine Similarity: {similarity:.4f}\n")
+    else:
+        print("No relevant chunks")
