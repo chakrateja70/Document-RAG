@@ -16,6 +16,7 @@ def main():
     print(f"Split the document into {len(chunks)} chunks.")
 
     embeddings = embed_documents(chunks)
+    print(f"Embedded {len(embeddings)} chunks.")
 
     # Store in ChromaDB
     collection = chroma_db(chunks, embeddings)
@@ -24,7 +25,7 @@ def main():
     rag_chain = setup_rag_chain(collection)
 
     # Example query
-    query = "Provide a detailed explanation of the 'Multi-Agent System for Web Search and Finance' project by Chakra Teja Polamarasetty, including its implementation and key components."
+    query="Your query here?"
     response = rag_chain.invoke(query)
     print(f"Query: {query}")
     print(f"Response: {response}")
